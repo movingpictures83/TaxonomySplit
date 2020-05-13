@@ -1,0 +1,2 @@
+Prefix plugins/TaxonomySplit/example
+Plugin TaxonomySplit inputfile abundances.csv outputfile abundances
