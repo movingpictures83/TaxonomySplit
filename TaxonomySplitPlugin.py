@@ -19,7 +19,8 @@ class TaxonomySplitPlugin:
          if (self.classificationlevel != 0 and len(taxonomy) != self.classificationlevel):
             print("WARNING MULTIPLE CLASSIFICATION LEVELS PRESENT")
          self.classificationlevel = max(self.classificationlevel, len(taxonomy))
-         for j in range(0, len(taxonomy)):
+         #for j in range(0, len(taxonomy)):
+         for j in range(len(taxonomy)-1, -1, -1):
             # TMC check if unclassifiable at this level, if so use the one higher
             if (taxonomy[j] == str(self.levels[j][0])): # Not classifiable
                k = j-1
@@ -48,7 +49,8 @@ class TaxonomySplitPlugin:
          counts = [dict(), dict(), dict(), dict(), dict(), dict(), dict()]  # 7 at most
          for i in range(0, len(elements)):
             taxonomy = self.taxa[i].split("..__")  # characters on which to split
-            for j in range(0, len(taxonomy)):
+            for j in range(len(taxonomy)-1, -1, -1):
+            #for j in range(0, len(taxonomy)):
                if (taxonomy[j] == str(self.levels[j][0])): # Not classifiable
                   k = j-1
                   while (taxonomy[k] == str(self.levels[k][0])):
