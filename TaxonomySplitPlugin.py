@@ -3,7 +3,7 @@ import sys
 class TaxonomySplitPlugin:
    def input(self, filename):
       filestuff = open(filename, 'r')
-      firstline = filestuff.readline() # Read first line
+      firstline = filestuff.readline().strip() # Read first line
       self.taxa = firstline.split(',')
       self.taxa.remove(self.taxa[0])  # Remove placeholder
 
@@ -11,6 +11,7 @@ class TaxonomySplitPlugin:
          self.taxa[i] = self.taxa[i].replace('\"', '')
          
 
+      self.levels = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
       self.classificationlevel = 0     
       self.taxanames = [[],[],[],[],[],[],[]]
       for taxon in self.taxa:
@@ -19,6 +20,12 @@ class TaxonomySplitPlugin:
             print("WARNING MULTIPLE CLASSIFICATION LEVELS PRESENT")
          self.classificationlevel = max(self.classificationlevel, len(taxonomy))
          for j in range(0, len(taxonomy)):
+            # TMC check if unclassifiable at this level, if so use the one higher
+            if (taxonomy[j] == str(self.levels[j][0])): # Not classifiable
+               k = j-1
+               while (taxonomy[k] == str(self.levels[k][0])):
+                  k -= 1
+               taxonomy[j] = taxonomy[k]+"("+self.levels[k]+")"
             if (taxonomy[j] not in self.taxanames[j]):
                self.taxanames[j].append(taxonomy[j])
          
@@ -30,7 +37,6 @@ class TaxonomySplitPlugin:
       for taxon in self.taxa:
          self.sums[taxon] = 0
 
-      self.levels = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
 
    def run(self):
       self.samplecounts = []
@@ -43,6 +49,11 @@ class TaxonomySplitPlugin:
          for i in range(0, len(elements)):
             taxonomy = self.taxa[i].split("..__")  # characters on which to split
             for j in range(0, len(taxonomy)):
+               if (taxonomy[j] == str(self.levels[j][0])): # Not classifiable
+                  k = j-1
+                  while (taxonomy[k] == str(self.levels[k][0])):
+                     k -= 1
+                  taxonomy[j] = taxonomy[k]+"("+self.levels[k]+")"
                if (taxonomy[j] in counts[j]):
                   counts[j][taxonomy[j]] += float(elements[i])
                else:
