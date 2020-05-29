@@ -15,7 +15,7 @@ class TaxonomySplitPlugin:
       self.classificationlevel = 0     
       self.taxanames = [[],[],[],[],[],[],[]]
       for taxon in self.taxa:
-         taxonomy = taxon.split("..__")
+         taxonomy = taxon.split("; __")
          if (self.classificationlevel != 0 and len(taxonomy) != self.classificationlevel):
             print("WARNING MULTIPLE CLASSIFICATION LEVELS PRESENT")
          self.classificationlevel = max(self.classificationlevel, len(taxonomy))
@@ -48,7 +48,7 @@ class TaxonomySplitPlugin:
          elements.remove(elements[0]) # remove sample name
          counts = [dict(), dict(), dict(), dict(), dict(), dict(), dict()]  # 7 at most
          for i in range(0, len(elements)):
-            taxonomy = self.taxa[i].split("..__")  # characters on which to split
+            taxonomy = self.taxa[i].split("; __")  # characters on which to split
             for j in range(len(taxonomy)-1, -1, -1):
             #for j in range(0, len(taxonomy)):
                if (taxonomy[j] == str(self.levels[j][0])): # Not classifiable
