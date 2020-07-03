@@ -1,5 +1,5 @@
 import sys
-
+import os
 class TaxonomySplitPlugin:
    def input(self, filename):
       filestuff = open(filename, 'r')
@@ -10,7 +10,6 @@ class TaxonomySplitPlugin:
       for i in range(len(self.taxa)):
          self.taxa[i] = self.taxa[i].replace('\"', '')
          
-
       self.levels = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
       self.classificationlevel = 0     
       self.taxanames = [[],[],[],[],[],[],[]]
@@ -18,6 +17,7 @@ class TaxonomySplitPlugin:
          taxonomy = taxon.split("; __")
          if (self.classificationlevel != 0 and len(taxonomy) != self.classificationlevel):
             print("WARNING MULTIPLE CLASSIFICATION LEVELS PRESENT")
+            print(taxonomy)
          self.classificationlevel = max(self.classificationlevel, len(taxonomy))
          #for j in range(0, len(taxonomy)):
          for j in range(len(taxonomy)-1, -1, -1):
@@ -27,9 +27,10 @@ class TaxonomySplitPlugin:
                while (taxonomy[k] == str(self.levels[k][0])):
                   k -= 1
                taxonomy[j] = taxonomy[k]+"("+self.levels[k]+")"
+            elif (j == 6):
+               taxonomy[j] = taxonomy[j-1]+" "+taxonomy[j]
             if (taxonomy[j] not in self.taxanames[j]):
                self.taxanames[j].append(taxonomy[j])
-         
       self.lines = []
       for line in filestuff:
          self.lines.append(line)
@@ -43,11 +44,13 @@ class TaxonomySplitPlugin:
       self.samplecounts = []
       self.samplenames = []
       for line in self.lines:
+         #print("******************************* NEW SAMPLE **************************************")
          elements = line.split(',')
          self.samplenames.append(elements[0])
          elements.remove(elements[0]) # remove sample name
          counts = [dict(), dict(), dict(), dict(), dict(), dict(), dict()]  # 7 at most
          for i in range(0, len(elements)):
+            #print("CLASSIFYING TAXON: "+self.taxa[i])
             taxonomy = self.taxa[i].split("; __")  # characters on which to split
             for j in range(len(taxonomy)-1, -1, -1):
             #for j in range(0, len(taxonomy)):
@@ -56,15 +59,31 @@ class TaxonomySplitPlugin:
                   while (taxonomy[k] == str(self.levels[k][0])):
                      k -= 1
                   taxonomy[j] = taxonomy[k]+"("+self.levels[k]+")"
+               elif (j == 6):
+                  taxonomy[j] = taxonomy[j-1]+" "+taxonomy[j]
                if (taxonomy[j] in counts[j]):
                   counts[j][taxonomy[j]] += float(elements[i])
+                  #if (float(elements[i]) != 0):
+                  #  print("ADDING "+elements[i]+" TO "+taxonomy[j]+": "+str(counts[j][taxonomy[j]]))
                else:
+                  #if (float(elements[i]) != 0):
+                  #  print("CREATING NEW "+taxonomy[j])
                   counts[j][taxonomy[j]] = float(elements[i])
          self.samplecounts.append(counts)
+         #print("******************************* DONE SAMPLE **************************************")
 
    def output(self,filename):
+      directories = False
+      #print(filename[0:filename.rfind('/')]+"/kingdom")
+      if os.path.exists(filename[0:filename.rfind('/')]+"/kingdom"):
+         directories = True
       for i in range(self.classificationlevel):
-         outstuff = open(filename+"."+self.levels[i]+".csv", 'w')
+         if (directories):
+            prefix = filename[0:filename.rfind('/')]+"/"+self.levels[i]+"/"+filename[filename.rfind('/')+1:len(filename)]
+         else:
+            prefix = filename+"."+self.levels[i]+".csv"
+         
+         outstuff = open(prefix, 'w')
          outstuff.write('\"\",')
          names = []
          for taxon in self.taxanames[i]:
