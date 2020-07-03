@@ -2,7 +2,8 @@
 # Language: Python
 # Input: CSV
 # Output: Prefix
-# Tested with: PluMA 1.0, Python 3.6
+# Tested with: PluMA 1.1, Python 3.6
+
 
 PluMA plugin that takes a CSV file of taxa abundances (unnormalized)
 and splits it into multiple CSV files, one at each level of the taxonomic tree.
