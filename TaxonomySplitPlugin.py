@@ -6,7 +6,7 @@ class TaxonomySplitPlugin:
       firstline = filestuff.readline().strip() # Read first line
       self.taxa = firstline.split(',')
       self.taxa.remove(self.taxa[0])  # Remove placeholder
-
+      self.taxmap = dict()
       for i in range(len(self.taxa)):
          self.taxa[i] = self.taxa[i].replace('\"', '')
          
@@ -69,11 +69,29 @@ class TaxonomySplitPlugin:
                   #if (float(elements[i]) != 0):
                   #  print("CREATING NEW "+taxonomy[j])
                   counts[j][taxonomy[j]] = float(elements[i])
+            self.taxmap[self.taxa[i]] = taxonomy
          self.samplecounts.append(counts)
          #print("******************************* DONE SAMPLE **************************************")
 
    def output(self,filename):
       directories = False
+      
+      taxfile = open(filename+".tax.csv", 'w')
+      taxfile.write('\"\"')
+      for i in range(self.classificationlevel):
+         taxfile.write(',')
+         taxfile.write(self.levels[i])
+      taxfile.write('\n')
+
+      for taxon in self.taxa:
+         taxfile.write(taxon+",")
+         for i in range(self.classificationlevel):
+            taxfile.write(self.taxmap[taxon][i])
+            if (i != self.classificationlevel-1):
+               taxfile.write(',')
+            else:
+               taxfile.write('\n')
+
       #print(filename[0:filename.rfind('/')]+"/kingdom")
       if os.path.exists(filename[0:filename.rfind('/')]+"/kingdom"):
          directories = True
